@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <style>
+        .card-fixed-height {
+            height: 600px;
+            overflow: auto;
+        }
+
+        #fileList img {
+            height: 80%;
+            object-fit: scale-down;
+        }
+
+        #fileElem {
+            display: none
+        }
+    </style>
+    <script src="../static/js/index.js" defer></script>
+</head>
+
+<body>
+<div class="container mt-md-3 mt-5 ">
+    <div class="row row-cols-1 row-cols-lg-2 g-2">
+        <div class="col">
+            <div class="card text-center border-primary card-fixed-height mb-3 col">
+                <h5 class="card-header">上传图片</h5>
+                <div class="card-body" id="fileList">
+                    <p>没有选择任何文件，请<a id="link" href="#">选择图片</a></p>
+                </div>
+                <div class="card-footer text-center">
+
+                    <button class="btn btn-primary" id="fileSelect" type="button">选择图片</button>
+                    <input type="file" id="fileElem" accept="image/*">
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-success card-fixed-height mb-3 col">
+                <h5 class="card-header text-center">输出结果</h5>
+                <div class="card-body">
+                    <p class="card-text" id="result">输出的Latex表达式</p>
+
+                </div>
+                <div class="card-footer text-center">
+                    <button type="button" class="btn btn-success" id="upload" disabled>获取结果</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
