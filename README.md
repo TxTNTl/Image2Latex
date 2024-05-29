@@ -28,3 +28,7 @@
 
 ## English Version
 To be continued
+
+## Author
+
+ltx lxt lzw
