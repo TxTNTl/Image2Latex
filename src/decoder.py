@@ -2,9 +2,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from src.config import basic_dict
+
 
 class AttentionGRUDecoder(nn.Module):
     def __init__(self, hidden_size, attention_dim, output_size, n_layers=1, use_dropout=True):
+        # 512 256 113
         super(AttentionGRUDecoder, self).__init__()
         self.hidden_size = hidden_size
         self.attention_dim = attention_dim
@@ -14,39 +17,54 @@ class AttentionGRUDecoder(nn.Module):
 
         # GRU layers
         self.gru = nn.GRU(hidden_size, hidden_size, n_layers, batch_first=True, dropout=0.2 if use_dropout else 0)
+        # 512 to 512
 
         # Attention layers
-        self.attention = nn.Linear(hidden_size + attention_dim, attention_dim)
-        self.attention_combine = nn.Linear(attention_dim, hidden_size)
+        self.attention = nn.Linear(hidden_size + output_size, attention_dim * 2)  # 625 to 1024
+        self.attention_combine = nn.Linear(attention_dim + output_size, hidden_size)          # 625 to 512
 
         # Output layer to map GRU output to target vocabulary size
-        self.fc_out = nn.Linear(hidden_size, output_size)
+        self.fc_out = nn.Linear(hidden_size, output_size)                       # 512 to 113
 
-    def forward(self, encoder_outputs, hidden, target_seq=None, max_length=100):
-        batch_size = encoder_outputs.size(0)
+    def forward(self, encoder_outputs, hidden, target_seq=None, max_length=basic_dict['max_length']):
+        # target_seq 32 100 113
+        # encoder_outputs 32 1024 512
+        # hidden 1 32 512
+        batch_size = encoder_outputs.size(0)        # 32
         output_seq = []
 
         # Initialize the decoder input (start token embedding)
-        decoder_input = torch.zeros(batch_size, 1, self.hidden_size).to(encoder_outputs.device)
+        decoder_input = torch.zeros(batch_size, 1, self.output_size).to(encoder_outputs.device) # 32 1 113
+        encoder_outputs = encoder_outputs.float()
+        hidden = hidden.float()
+        decoder_input = decoder_input.float()
 
         # Iterate over each time step in the sequence
         for t in range(max_length):
             # Attention mechanism
+            # hidden 一直为1 32 512
+            temp = torch.cat((decoder_input.squeeze(1), hidden[-1]), dim=1) # 32 625
+            temp = temp.float()
             attn_weights = F.softmax(
-                self.attention(torch.cat((decoder_input.squeeze(1), hidden[-1]), dim=1)),
+                self.attention(temp),
                 dim=1
             )
-            attn_applied = torch.bmm(attn_weights.unsqueeze(1), encoder_outputs)
+            # attn_weights.unsqueeze(1) 32 1 1024
+            # encoder_outputs 32 1024 512
+            attn_applied = torch.bmm(attn_weights.unsqueeze(1), encoder_outputs) # 32 1 512
 
             # Combine attention output and GRU hidden state, then pass to GRU
-            gru_input = self.attention_combine(torch.cat((decoder_input.squeeze(1), attn_applied.squeeze(1)), dim=1))
-            gru_input = F.relu(gru_input).unsqueeze(1)
+            decoder_input = decoder_input.float()
+            attn_applied = attn_applied.float()
+            gru_input = self.attention_combine(torch.cat((decoder_input.squeeze(1), attn_applied.squeeze(1)), dim=1)) # 32 625 to 32 512
+            gru_input = F.relu(gru_input) # 32 1 512
 
             # Run through GRU
-            output, hidden = self.gru(gru_input, hidden)
+            # gru为512 to 512
+            output, hidden = self.gru(gru_input.unsqueeze(1), hidden)
 
             # Generate output (predicted token probabilities)
-            output_token = self.fc_out(output.squeeze(1))
+            output_token = self.fc_out(output.squeeze(1))   # 32 113
             output_seq.append(output_token)
 
             # Update decoder input to the next predicted token

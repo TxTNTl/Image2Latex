@@ -21,6 +21,7 @@ class FormulaDataset(Dataset):
         self.transform = transform
         self.dict, _ = load_dict()
         self.max_length = basic_dict['max_length']
+        self.image_files = sorted(os.listdir(self.img_dir))
 
     def _load_labels(self, label_file):
         # 读取所有的LaTeX公式，逐行存储到列表中
@@ -30,7 +31,7 @@ class FormulaDataset(Dataset):
 
     def one_hot_encode(self, label):
         # create one-hot code matrix
-        one_hot = np.zeros((self.max_length, len(self.dict)))
+        one_hot = np.zeros((self.max_length, len(self.dict))) # 100 113
         for t, char in enumerate(label):
             if t >= self.max_length:
                 break
@@ -41,10 +42,11 @@ class FormulaDataset(Dataset):
 
     def __len__(self):
         # 返回图片文件的数量，假设图片文件名是从 0 开始连续编号的
-        return len(os.listdir(self.img_dir))
+        return len(self.image_files)
 
     def __getitem__(self, idx):
-        img_path = os.path.join(self.img_dir, f"{idx}.png")
+        img_name = self.image_files[idx]
+        img_path = os.path.join(self.img_dir, img_name)
         image = Image.open(img_path)
         label = self.labels[idx]
         if self.transform:

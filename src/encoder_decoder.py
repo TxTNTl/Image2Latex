@@ -13,13 +13,13 @@ class FormulaRecognitionModel(nn.Module):
         self.max_length = max_length
 
     def forward(self, x, target_seq=None):
-        encoder_outputs = self.encoder(x)
+        encoder_outputs = self.encoder(x) # encoder_outputs # 32 512 32 32
 
         batch_size, channels, height, width = encoder_outputs.size()
         encoder_outputs = encoder_outputs.view(batch_size, channels, height * width)
-        encoder_outputs = encoder_outputs.permute(2, 0, 1)
+        encoder_outputs = encoder_outputs.permute(0, 2, 1) # 32 1024 512
 
-        hidden = torch.zeros(self.decoder.n_layers, batch_size, self.hidden_size).to(x.device)
+        hidden = torch.zeros(self.decoder.n_layers, batch_size, self.hidden_size).to(x.device)  # 1 32 512
 
         output_seq, hidden = self.decoder(encoder_outputs, hidden, target_seq, max_length=self.max_length)
         return output_seq

@@ -19,8 +19,10 @@ with torch.no_grad():
     for i in range(basic_dict['num_epochs']):
         running_loss = 0.0
         for images, labels in train_loader:
+            if images.size(0) < 32:
+                continue
             images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
+            outputs = model(images, labels)
             loss = criterion(outputs, labels)
             optimizer.zero_grad()
             loss.backward()
