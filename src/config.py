@@ -6,7 +6,7 @@ basic_dict = {
     'num_epochs': 10,
     'output_dir': '../models/',
     'dictionary_dir': './vocabulary.txt',
-    'max_length': 700,
+    'max_length': 2000,
 }
 
 train_dict = {
