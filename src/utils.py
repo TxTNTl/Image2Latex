@@ -31,13 +31,20 @@ class FormulaDataset(Dataset):
 
     def one_hot_encode(self, label):
         # create one-hot code matrix
-        one_hot = np.zeros((self.max_length, len(self.dict))) # 100 113
-        for t, char in enumerate(label):
+        one_hot = np.zeros((self.max_length, len(self.dict)))   # 200 696
+        tokens = label.split()
+        ls = []
+        for token in tokens:
+            token = token.strip()
+            if len(token) > 0:
+                ls.append(token)
+        for t, token in enumerate(ls):
             if t >= self.max_length:
                 break
-            index = self.dict.get(char, -1)
+            index = self.dict.get(token, -1)
             if index != -1:
                 one_hot[t, index] = 1
+        one_hot[len(ls), 695] = 1
         return one_hot
 
     def __len__(self):
@@ -55,7 +62,7 @@ class FormulaDataset(Dataset):
 
 
 def one_hot_decode(output_seq):
-    predicted_indices = torch.argmax(output_seq, dim=2)  # (batch_size=1, max_length)
+    predicted_indices = torch.argmax(output_seq, dim=2)  # (batch_size=1, max_length, vocab_size)
     _, dict_reversed = load_dict()
     latex_seq = [dict_reversed[idx] for idx in predicted_indices[0].cpu().numpy()]
 

@@ -4,7 +4,7 @@ from config import *
 
 
 class FormulaRecognitionModel(nn.Module):
-    def __init__(self, max_length=100):
+    def __init__(self, max_length=basic_dict['max_length']):
         super(FormulaRecognitionModel, self).__init__()
         self.encoder = DenseNet(basic_dict['growth_rate'])
         self.decoder = AttentionGRUDecoder(basic_dict['hidden_size'], basic_dict['attention_dim'],
