@@ -13,7 +13,7 @@ class AttentionGRUDecoder(nn.Module):
         self.n_layers = n_layers
         self.use_dropout = use_dropout
 
-        self.attention = nn.Linear(hidden_size + output_size, attention_dim * 2)  # 1208 to 1024
+        self.attention = nn.Linear(hidden_size + output_size, 64)
         self.attention_combine = nn.Linear(attention_dim + output_size, hidden_size)          # 1208 to 512
 
         self.gru = nn.GRU(hidden_size, hidden_size, n_layers, batch_first=True, dropout=0.2 if use_dropout else 0)  # 512 to 512
