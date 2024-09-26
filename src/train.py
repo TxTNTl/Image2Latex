@@ -3,9 +3,9 @@ from utils import *
 from torch import optim
 import time
 
-model = FormulaRecognitionModel()
+model = FormulaRecognitionModel(config.growth_rate, config.hidden_size, config.attention_dim, config.vocabulary_size)
 
-train_dataset = FormulaDataset(train_dict['image_dir'], train_dict['label_dir'])
+train_dataset = ParquetDataset(config.train_image_dir)
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
 model.train()
@@ -15,7 +15,7 @@ optimizer = optim.Adadelta(model.parameters(), lr=1, weight_decay=1e-4, eps=1e-6
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
-for i in range(basic_dict['num_epochs']):
+for i in range(config.num_epochs):
     running_loss = 0.0
     for images, labels in train_loader:
         if images.size(0) < 32:
@@ -27,6 +27,7 @@ for i in range(basic_dict['num_epochs']):
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
+        print(1)
     print(f"{i} / {basic_dict['num_epochs'] - 1}, loss = {running_loss / len(train_loader)}")
 
 output_dir = basic_dict['output_dir']

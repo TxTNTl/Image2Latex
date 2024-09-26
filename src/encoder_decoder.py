@@ -1,15 +1,14 @@
 from encoder import *
 from decoder import *
-from config import *
+import config
 
 
 class FormulaRecognitionModel(nn.Module):
-    def __init__(self, max_length=basic_dict['max_length']):
+    def __init__(self, growth_rate, hidden_size, attention_dim, vocab_size, max_length=config.max_length):
         super(FormulaRecognitionModel, self).__init__()
-        self.encoder = DenseNet(basic_dict['growth_rate'])
-        self.decoder = AttentionGRUDecoder(basic_dict['hidden_size'], basic_dict['attention_dim'],
-                                           basic_dict['vocab_size'])
-        self.hidden_size = basic_dict['hidden_size']
+        self.encoder = DenseNet(growth_rate)
+        self.decoder = AttentionGRUDecoder(hidden_size, attention_dim, vocab_size)
+        self.hidden_size = hidden_size
         self.max_length = max_length
 
     def forward(self, x, target_seq=None):
@@ -20,7 +19,7 @@ class FormulaRecognitionModel(nn.Module):
 
         batch_size, channels, height, width = encoder_outputs.size()
         encoder_outputs = encoder_outputs.view(batch_size, channels, height * width)
-        encoder_outputs = encoder_outputs.permute(0, 2, 1) # 32 1024 512
+        encoder_outputs = encoder_outputs.permute(0, 2, 1)  # 32 1024 512
 
         hidden = torch.zeros(self.decoder.n_layers, batch_size, self.hidden_size).to(device)  # 1 32 512
 
