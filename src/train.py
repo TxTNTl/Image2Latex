@@ -36,7 +36,7 @@ def train(train_image_dir):
     output_dir = config.model_output_dir
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    formatted_time = time.strftime("%Y-%m-%d %H-%M-%S", time.localtime())
     torch.save(model, os.path.join(output_dir, f'{formatted_time}.pth'))
 
 
