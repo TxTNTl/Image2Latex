@@ -3,6 +3,7 @@ hidden_size = 512
 attention_dim = 512
 vocabulary_size = 556
 num_epochs = 25
+num_continue_epochs = 15
 model_output_dir = '../models/'
 max_length = 151
 dictionary_dir = './dictionary.txt'
